@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlphaEvolve PCB Placement — Presentation Deck</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-code: #0b1120;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-green: #4ade80;
+      --accent-amber: #fbbf24;
+      --accent-red: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Header Bar */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 32px;
+      background: rgba(15, 23, 42, 0.9);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--accent-blue);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 28px;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, width 0.2s;
+    }
+
+    .dot.active {
+      background: var(--accent-blue);
+      width: 44px;
+    }
+
+    /* Main Slide Stage */
+    main {
+      flex: 1;
+      position: relative;
+      overflow-y: auto;
+      padding: 28px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1280px;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 36px;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p, .card li {
+      font-size: 15px;
+      line-height: 1.55;
+      color: #e2e8f0;
+    }
+
+    .card ul {
+      padding-left: 20px;
+    }
+
+    .card li {
+      margin-bottom: 6px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      text-align: center;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent-green);
+      margin: 6px 0;
+    }
+
+    .kpi-label {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .kpi-sub {
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .callout {
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.14), rgba(129, 140, 248, 0.08));
+      border-left: 4px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 11px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--accent-blue);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-good {
+      background: rgba(74, 222, 128, 0.18);
+      color: var(--accent-green);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .badge-warn {
+      background: rgba(251, 191, 36, 0.18);
+      color: var(--accent-amber);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Code Blocks */
+    pre {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      color: var(--accent-blue);
+    }
+
+    .comment { color: #64748b; }
+    .kw { color: #c084fc; }
+    .num { color: #fbbf24; }
+    .fn { color: #38bdf8; }
+
+    /* Flow Diagram */
+    .flow-row {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .flow-step {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .flow-step h4 {
+      color: var(--accent-amber);
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .flow-step p {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+
+    .img-container {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 18px;
+      border: 2px solid var(--border);
+    }
+
+    .img-container img {
+      max-width: 100%;
+      max-height: 440px;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    /* Footer Controls */
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 32px;
+      background: rgba(15, 23, 42, 0.95);
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background: #334155;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #0f172a;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">AlphaEvolve on Google Cloud • PCB Placement Case Study</div>
+    <div class="slide-dots" id="dotsContainer"></div>
+    <div id="slideCounter" style="font-size: 14px; color: var(--text-muted);">Slide 1 / 7</div>
+  </header>
+
+  <main>
+    <!-- SLIDE 1: EXECUTIVE SUMMARY -->
+    <section class="slide active">
+      <span class="slide-tag">Slide 1 • Executive Overview</span>
+      <h1>From a 7-Line Random Script to a 400-Line PCB Placement Engine</h1>
+      <p class="subtitle">
+        Using AlphaEvolve (<code>gemini-3.8-flash</code>) to discover a deterministic Electronic Design Automation (EDA) layout algorithm.
+      </p>
+
+      <div class="callout">
+        <strong>Core Distinction — AlphaEvolve Evolves Algorithms, Not Static Answers:</strong><br />
+        We did not ask an LLM to guess 8 <code>(x, y)</code> coordinates. Instead, we gave AlphaEvolve a <strong>7-line random number generator</strong> (<code>initial_program.py</code>) and a <strong>physics scorer</strong> (<code>evaluator.py</code>). Over 49 candidates, it wrote a <strong>393-line optimization algorithm</strong> (<code>best_program.py</code>) that solves the board layout from scratch in under 0.2 seconds.
+      </div>
+
+      <div class="grid-4">
+        <div class="kpi-card">
+          <div class="kpi-label">Combined Score</div>
+          <div class="kpi-value">0.2522</div>
+          <div class="kpi-sub">Up <strong>3.8×</strong> from 0.0661 seed</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Wirelength</div>
+          <div class="kpi-value">-74.3%</div>
+          <div class="kpi-sub">210.5 mm → <strong>54.0 mm</strong></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MCU ↔ Crystal Dist</div>
+          <div class="kpi-value">5.34 mm</div>
+          <div class="kpi-sub">Down from 29.19 mm (-81.7%)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Algorithm Growth</div>
+          <div class="kpi-value">7 → 393</div>
+          <div class="kpi-sub">Lines of pure Python solver code</div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>What the Code Does</th>
+            <th>Code Size</th>
+            <th>Valid Layout?</th>
+            <th>Score (0 to 1)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>initial_program.py</code> (Seed)</td>
+            <td>Blindly picks random <code>(x, y)</code> points using <code>random.uniform()</code></td>
+            <td>7 lines</td>
+            <td>Usually overlaps (seed=0 happens to pass)</td>
+            <td><span class="badge-warn">0.0661</span></td>
+          </tr>
+          <tr>
+            <td><code>best_program.py</code> (<code>prog-nickel-puffin</code>)</td>
+            <td>Role discovery + Domain seeding + Barycentric Simulated Annealing + 8-way Coordinate Descent</td>
+            <td><strong>393 lines</strong></td>
+            <td>Guaranteed legalized (0.335 mm clearance)</td>
+            <td><span class="badge-good">0.2522</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SLIDE 2: THE PROBLEM -->
+    <section class="slide">
+      <span class="slide-tag">Slide 2 • The Problem (problem.py)</span>
+      <h1>The Problem: Placing 8 Connected Parts on a 50 × 50 mm Board</h1>
+      <p class="subtitle">
+        Every component has a physical millimeter footprint and must be wired to specific components without colliding.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>1. The 8 Physical Components</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Size (mm)</th>
+                <th>Role on the Board</th>
+                <th>Wired Connections (NETS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>MCU</strong></td>
+                <td>7.0 × 7.0</td>
+                <td>Microcontroller (central hub)</td>
+                <td><code>XTAL, C1, C2, HDR, LED</code></td>
+              </tr>
+              <tr>
+                <td><strong>XTAL</strong></td>
+                <td>3.0 × 2.5</td>
+                <td>High-frequency clock crystal</td>
+                <td><code>MCU</code></td>
+              </tr>
+              <tr>
+                <td><strong>C1, C2</strong></td>
+                <td>1.6 × 0.8</td>
+                <td>Decoupling capacitors (filter noise)</td>
+                <td>Both wire to <code>MCU</code> &amp; <code>LDO</code></td>
+              </tr>
+              <tr>
+                <td><strong>LDO</strong></td>
+                <td>3.0 × 3.0</td>
+                <td>Voltage regulator (noisy/warm)</td>
+                <td><code>USB, C1, C2</code></td>
+              </tr>
+              <tr>
+                <td><strong>USB</strong></td>
+                <td>8.0 × 6.0</td>
+                <td>Power &amp; data input connector</td>
+                <td><code>LDO</code></td>
+              </tr>
+              <tr>
+                <td><strong>HDR</strong></td>
+                <td>10.0 × 3.0</td>
+                <td>10-pin expansion header</td>
+                <td><code>MCU</code></td>
+              </tr>
+              <tr>
+                <td><strong>LED</strong></td>
+                <td>1.6 × 0.8</td>
+                <td>Status indicator light</td>
+                <td><code>MCU</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>2. Why Is This Optimization Trickier Than It Looks?</h3>
+          <ul>
+            <li><strong>The Geometric Tug-of-War:</strong> Decoupling capacitors <code>C1</code> and <code>C2</code> connect to both the <code>MCU</code> and the <code>LDO</code>. Pulling the wires tight naturally drags the <code>LDO</code> right next to the <code>MCU</code>.</li>
+            <li><strong>The EMI / Thermal Conflict:</strong> The <code>XTAL</code> clock crystal must sit flush against the <code>MCU</code>, <em>and</em> the noisy <code>LDO</code> regulator must be kept at least <strong>20 mm away</strong> from <code>XTAL</code>!</li>
+            <li><strong>Box Packing Constraints:</strong> All 8 rectangular footprints have different dimensions (from <code>1.6×0.8 mm</code> caps up to the <code>10×3 mm</code> header and <code>7×7 mm</code> MCU) and require a strict <code>0.3 mm</code> air gap on all sides.</li>
+          </ul>
+          <div style="margin-top: 16px;">
+            <pre><span class="comment"># problem.py — The entire input data</span>
+BOARD = (<span class="num">50.0</span>, <span class="num">50.0</span>)
+COMPONENTS = {
+  <span class="fn">"MCU"</span>: (<span class="num">7</span>, <span class="num">7</span>), <span class="fn">"XTAL"</span>: (<span class="num">3</span>, <span class="num">2.5</span>), <span class="fn">"C1"</span>: (<span class="num">1.6</span>, <span class="num">0.8</span>), <span class="fn">"C2"</span>: (<span class="num">1.6</span>, <span class="num">0.8</span>),
+  <span class="fn">"LDO"</span>: (<span class="num">3</span>, <span class="num">3</span>), <span class="fn">"USB"</span>: (<span class="num">8</span>, <span class="num">6</span>), <span class="fn">"HDR"</span>: (<span class="num">10</span>, <span class="num">3</span>), <span class="fn">"LED"</span>: (<span class="num">1.6</span>, <span class="num">0.8</span>),
+}
+NETS = [
+  [<span class="fn">"MCU"</span>, <span class="fn">"XTAL"</span>], [<span class="fn">"MCU"</span>, <span class="fn">"C1"</span>], [<span class="fn">"MCU"</span>, <span class="fn">"C2"</span>],
+  [<span class="fn">"USB"</span>, <span class="fn">"LDO"</span>],  [<span class="fn">"LDO"</span>, <span class="fn">"C1"</span>], [<span class="fn">"LDO"</span>, <span class="fn">"C2"</span>],
+  [<span class="fn">"MCU"</span>, <span class="fn">"HDR"</span>],  [<span class="fn">"MCU"</span>, <span class="fn">"LED"</span>],
+]</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: WHAT WE ARE OPTIMIZING -->
+    <section class="slide">
+      <span class="slide-tag">Slide 3 • Scoring &amp; Objectives (evaluator.py)</span>
+      <h1>What We Are Trying to Optimize: Rules &amp; Cost Formula</h1>
+      <p class="subtitle">
+        <code>evaluator.py</code> grades any candidate program on a scale from <code>0.0</code> (broken rule) to <code>1.0</code> (theoretical zero-cost perfection).
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Step 1: Three Hard Rules (Violation = Score 0.0)</h3>
+          <ul>
+            <li><strong>All Parts Placed:</strong> Must return valid <code>(x, y)</code> coordinates for all 8 part names.</li>
+            <li><strong>Inside the 50 × 50 mm Board:</strong> Every part's outer edge must stay inside <code>[0, 50]</code> (`w/2 &le; x &le; 50 - w/2`).</li>
+            <li><strong>Zero Overlaps (0.3 mm Clearance):</strong> No two rectangles can come closer than <code>GAP = 0.3 mm</code> on both X and Y axes.</li>
+          </ul>
+          <h3 style="margin-top: 18px;">Step 2: The 4-Term Engineering Cost</h3>
+          <pre>cost = <span class="num">1.0</span> * wirelength            <span class="comment"># Sum of net bounding boxes (HPWL)</span>
+     + <span class="num">3.0</span> * dist(XTAL, MCU)       <span class="comment"># Heavy penalty if crystal is far</span>
+     + <span class="num">3.0</span> * avg_dist(C1/C2, MCU)  <span class="comment"># Heavy penalty if decaps are far</span>
+     - <span class="num">0.5</span> * min(dist(LDO,XTAL),<span class="num">20</span>)<span class="comment"># Up to -10pt bonus for LDO isolation</span>
+
+combined_score = <span class="num">1.0</span> / (<span class="num">1.0</span> + cost / <span class="num">25.0</span>)</pre>
+        </div>
+
+        <div class="card">
+          <h3>Concrete Example: Seed vs. Evolved Math</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Cost Term</th>
+                <th>Weight</th>
+                <th>Seed (<code>initial_program.py</code>)</th>
+                <th>Evolved (<code>best_program.py</code>)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Total Wirelength (HPWL)</strong></td>
+                <td><code>× 1.0</code></td>
+                <td>210.51 mm → <code>210.51</code></td>
+                <td>54.00 mm → <strong><code>54.00</code></strong></td>
+              </tr>
+              <tr>
+                <td><strong>2. Crystal to MCU</strong></td>
+                <td><code>× 3.0</code></td>
+                <td>29.19 mm → <code>87.57</code></td>
+                <td>5.34 mm → <strong><code>16.01</code></strong></td>
+              </tr>
+              <tr>
+                <td><strong>3. Avg Decap (C1,C2) to MCU</strong></td>
+                <td><code>× 3.0</code></td>
+                <td>21.03 mm → <code>63.09</code></td>
+                <td>4.71 mm → <strong><code>14.12</code></strong></td>
+              </tr>
+              <tr>
+                <td><strong>4. LDO to XTAL Isolation Bonus</strong></td>
+                <td><code>× -0.5</code></td>
+                <td>15.59 mm → <code>-7.80</code></td>
+                <td>20.78 mm (capped 20) → <strong><code>-10.00</code></strong></td>
+              </tr>
+              <tr>
+                <td><strong>Total Raw Cost</strong> (Lower = Better)</td>
+                <td>—</td>
+                <td><strong><code>353.37</code></strong></td>
+                <td><strong><code>74.13</code></strong> (-79% cost)</td>
+              </tr>
+              <tr>
+                <td><strong>Final Combined Score</strong></td>
+                <td><code>1/(1+cost/25)</code></td>
+                <td><span class="badge-warn">0.0661</span></td>
+                <td><span class="badge-good">0.2522</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: HOW ALPHAEVOLVE WORKS -->
+    <section class="slide">
+      <span class="slide-tag">Slide 4 • How AlphaEvolve Works</span>
+      <h1>How AlphaEvolve Evolved the Algorithm Over 49 Generations</h1>
+      <p class="subtitle">
+        AlphaEvolve runs an evolutionary loop where Gemini 3.8 Flash rewrites the code inside <code># EVOLVE-BLOCK</code>, guided by metric feedback from local evaluations.
+      </p>
+
+      <div class="flow-row">
+        <div class="flow-step">
+          <h4>1. Seed Upload</h4>
+          <p>We uploaded <code>initial_program.py</code> (score <code>0.0661</code>) to experiment <code>exp-flashy-hedgehog</code> as the starting parent.</p>
+        </div>
+        <div class="flow-step">
+          <h4>2. Parent &amp; Prompt Sampling</h4>
+          <p>AlphaEvolve selects high-scoring parent programs from its database along with their metric insights (<code>wirelength</code>, <code>xtal_dist</code>).</p>
+        </div>
+        <div class="flow-step">
+          <h4>3. Gemini Code Mutation</h4>
+          <p><code>gemini-3.8-flash</code> proposes a brand-new Python implementation of <code>place()</code> to fix bottlenecks in the parent.</p>
+        </div>
+        <div class="flow-step">
+          <h4>4. Local Evaluation</h4>
+          <p><code>ae experiment run</code> downloads the candidate, runs <code>evaluator.py</code> locally, and submits the score + insights back.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Live Evolution Timeline from Our Run (<code>exp-flashy-hedgehog</code>)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Iteration</th>
+              <th>Candidate Nickname</th>
+              <th>Score</th>
+              <th>Algorithmic Breakthrough Introduced by AlphaEvolve</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Baseline</td>
+              <td><code>initial_program.py</code></td>
+              <td><code>0.0661</code></td>
+              <td>7-line random uniform placement (no collision avoidance, no net awareness).</td>
+            </tr>
+            <tr>
+              <td>Candidate #1</td>
+              <td><code>prog-amphibian-goldfish</code></td>
+              <td><code>0.2124</code> ★</td>
+              <td>First leap: Added overlap validation and placed parts around the MCU center.</td>
+            </tr>
+            <tr>
+              <td>Candidate #3</td>
+              <td><code>prog-electric-caiman</code></td>
+              <td><code>0.2215</code> ★</td>
+              <td>Explicitly docked <code>XTAL</code>, <code>C1</code>, and <code>C2</code> against the MCU edges.</td>
+            </tr>
+            <tr>
+              <td>Candidate #4</td>
+              <td><code>prog-rustling-dragon</code></td>
+              <td><code>0.2349</code> ★</td>
+              <td>Added Simulated Annealing + pushed <code>LDO</code> away from <code>XTAL</code> to capture the isolation bonus.</td>
+            </tr>
+            <tr>
+              <td>Candidate #18</td>
+              <td><code>prog-speedy-kakapo</code></td>
+              <td><code>0.2246</code></td>
+              <td>Parent of the winner: Introduced 12 multi-start diagonal configurations + coordinate descent fine-tuning.</td>
+            </tr>
+            <tr>
+              <td><strong>Candidate #25</strong></td>
+              <td><strong><code>prog-nickel-puffin</code></strong></td>
+              <td><span class="badge-good">0.2522 ★</span></td>
+              <td><strong>Winner:</strong> Added 35% <strong>barycenter neighbor-pull moves</strong> during annealing + <strong>8-directional diagonal coordinate descent</strong>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: SEED VS EVOLVED PROGRAM COMPARISON -->
+    <section class="slide">
+      <span class="slide-tag">Slide 5 • Code Comparison: Seed vs. Winner</span>
+      <h1>What AlphaEvolve Produces: Seed vs. Evolved Program</h1>
+      <p class="subtitle">
+        Both programs define <code>def place(seed=0):</code> and use only the Python standard library (<code>math</code>, <code>random</code>), but their internal intelligence is night and day.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Seed Program (<code>initial_program.py</code> — 7 Lines)</h3>
+          <p style="margin-bottom: 10px;">Throws darts blindfolded at the board:</p>
+          <pre><span class="comment"># EVOLVE-BLOCK-START</span>
+<span class="kw">def</span> <span class="fn">place</span>(seed=<span class="num">0</span>):
+    rng = random.Random(seed)
+    pos = {}
+    <span class="kw">for</span> name, (w, h) <span class="kw">in</span> COMPONENTS.items():
+        pos[name] = (
+            rng.uniform(w / <span class="num">2</span>, BOARD[<span class="num">0</span>] - w / <span class="num">2</span>),
+            rng.uniform(h / <span class="num">2</span>, BOARD[<span class="num">1</span>] - h / <span class="num">2</span>)
+        )
+    <span class="kw">return</span> pos
+<span class="comment"># EVOLVE-BLOCK-END</span></pre>
+          <ul style="margin-top: 14px;">
+            <li><strong>Ignores <code>NETS</code>:</strong> Has no idea which parts are wired together.</li>
+            <li><strong>Ignores Collisions:</strong> Does not check if two parts land on top of each other.</li>
+            <li><strong>Zero Optimization:</strong> Samples 1 random layout and returns immediately.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Evolved Program (<code>best_program.py</code> — 393 Lines)</h3>
+          <p style="margin-bottom: 10px;">A complete, general-purpose 5-stage EDA placement solver:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>How <code>best_program.py</code> Implements It</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Role &amp; Net Graph</strong> (Lines 22–103)</td>
+                <td>Auto-detects <code>MCU</code>, <code>XTAL</code>, <code>LDO</code>, and <code>C1/C2</code> by name/area and builds a graph adjacency list <code>adj[i]</code> from <code>NETS</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>2. Surrogate Cost</strong> (Lines 104–185)</td>
+                <td>Defines <code>compute_cost(xs, ys)</code> with smooth quadratic overlap repulsion (<code>50,000 × v²</code>) and safety clearance <code>c_target = 0.335 mm</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>3. Legalizer &amp; Seeds</strong> (Lines 186–305)</td>
+                <td>Generates 12 structured diagonal seeds + 3 random seeds and runs force-directed <code>legalize_layout()</code> to push apart overlaps.</td>
+              </tr>
+              <tr>
+                <td><strong>4. Hybrid Annealing</strong> (Lines 311–368)</td>
+                <td>Runs <strong>15 starts × 1,800 steps = 27,000 evaluations</strong> mixing Gaussian exploration (65%) with barycenter neighbor pulls (35%).</td>
+              </tr>
+              <tr>
+                <td><strong>5. 8-Way Polish</strong> (Lines 369–404)</td>
+                <td>Sweeps 7 step sizes (<code>0.6 mm → 0.01 mm</code>) across 8 cardinal + diagonal directions to pack parts tightly.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: INSIDE THE EVOLVED PROGRAM -->
+    <section class="slide">
+      <span class="slide-tag">Slide 6 • Inside best_program.py</span>
+      <h1>Inside the Evolved Code: 3 Key Algorithms It Invented</h1>
+      <p class="subtitle">
+        Actual code excerpts from <code>best_program.py</code> showing how the evolved program solves the placement problem.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>A. Force-Push Overlap Legalizer</h3>
+          <p style="margin-bottom: 10px;">Instead of discarding invalid layouts, it pushes colliding boxes apart with a <code>0.335 mm</code> safety margin:</p>
+          <pre><span class="kw">def</span> <span class="fn">legalize_layout</span>(xs, ys, max_iters=<span class="num">40</span>):
+  <span class="kw">for</span> _ <span class="kw">in</span> range(max_iters):
+    <span class="kw">for</span> i <span class="kw">in</span> range(n):
+      <span class="kw">for</span> j <span class="kw">in</span> range(i + <span class="num">1</span>, n):
+        dx = abs(xs[i]-xs[j]) - (ws[i]+ws[j])*<span class="num">0.5</span>
+        dy = abs(ys[i]-ys[j]) - (hs[i]+hs[j])*<span class="num">0.5</span>
+        sep = dx <span class="kw">if</span> dx &gt; dy <span class="kw">else</span> dy
+        <span class="kw">if</span> sep &lt; c_target: <span class="comment"># 0.335 mm</span>
+          push = (c_target - sep) * <span class="num">0.52</span>
+          <span class="comment"># Push apart along min-overlap axis</span></pre>
+        </div>
+
+        <div class="card">
+          <h3>B. Barycentric Simulated Annealing</h3>
+          <p style="margin-bottom: 10px;">35% of annealing moves pull a part directly toward the center of gravity (barycenter) of its wired neighbors:</p>
+          <pre><span class="kw">if</span> move_type &lt; <span class="num">0.65</span> <span class="kw">or not</span> adj[idx]:
+  <span class="comment"># 65%: Local Gaussian exploration</span>
+  new_x = orig_x + rng.gauss(<span class="num">0</span>, scale)
+  new_y = orig_y + rng.gauss(<span class="num">0</span>, scale)
+<span class="kw">else</span>:
+  <span class="comment"># 35%: Pull toward wired neighbors!</span>
+  tx = sum(cur_xs[nb] <span class="kw">for</span> nb <span class="kw">in</span> adj[idx])/len(adj[idx])
+  ty = sum(cur_ys[nb] <span class="kw">for</span> nb <span class="kw">in</span> adj[idx])/len(adj[idx])
+  alpha = rng.uniform(<span class="num">0.1</span>, <span class="num">0.4</span>)
+  new_x = orig_x*(<span class="num">1</span>-alpha) + tx*alpha</pre>
+        </div>
+
+        <div class="card">
+          <h3>C. 8-Direction Coordinate Descent</h3>
+          <p style="margin-bottom: 10px;">After annealing, it nudges every component along 8 compass directions down to <code>0.01 mm</code> precision:</p>
+          <pre>deltas = (<span class="num">0.6</span>, <span class="num">0.3</span>, <span class="num">0.15</span>, <span class="num">0.08</span>, <span class="num">0.04</span>, <span class="num">0.02</span>, <span class="num">0.01</span>)
+dirs = (
+  (<span class="num">1</span>,<span class="num">0</span>), (<span class="num">-1</span>,<span class="num">0</span>), (<span class="num">0</span>,<span class="num">1</span>), (<span class="num">0</span>,<span class="num">-1</span>),
+  (<span class="num">0.7</span>,<span class="num">0.7</span>), (<span class="num">-0.7</span>,<span class="num">-0.7</span>), (<span class="num">0.7</span>,<span class="num">-0.7</span>), (<span class="num">-0.7</span>,<span class="num">0.7</span>)
+)
+<span class="kw">for</span> delta_size <span class="kw">in</span> deltas:
+  <span class="comment"># Greedily step each part in 8 directions</span>
+  <span class="comment"># if cost improves without violations</span></pre>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Why This Matters:</strong> Because AlphaEvolve evolved a <em>general solver</em> rather than hardcoded numbers, <code>best_program.py</code> automatically adapts if you change component sizes or add nets in <code>problem.py</code>.
+      </div>
+    </section>
+
+    <!-- SLIDE 7: FINAL RESULTS -->
+    <section class="slide">
+      <span class="slide-tag">Slide 7 • Final Visual &amp; Metric Results</span>
+      <h1>Final Results: Initial Seed vs. AlphaEvolve Best Layout</h1>
+      <p class="subtitle">
+        Side-by-side physical rendering of the <code>50 × 50 mm</code> board and metric comparison against the hand-crafted reference.
+      </p>
+
+      <div class="img-container">
+        <img src="layout_comparison.png" alt="Initial Seed Layout vs AlphaEvolve Best Layout" />
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Initial Seed (<code>initial_program.py</code>)</th>
+            <th>AlphaEvolve Best (<code>best_program.py</code>)</th>
+            <th>Hand-Crafted Reference (<code>example_good.py</code>)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Combined Score</strong> (Higher = Better)</td>
+            <td><span class="badge-warn">0.0661</span></td>
+            <td><span class="badge-good">0.2522 (+281%)</span></td>
+            <td><code>0.2528</code></td>
+          </tr>
+          <tr>
+            <td><strong>Total Wirelength (HPWL)</strong></td>
+            <td>210.51 mm</td>
+            <td><strong>54.00 mm (-74.3%)</strong></td>
+            <td>46.70 mm</td>
+          </tr>
+          <tr>
+            <td><strong>MCU ↔ XTAL Distance</strong></td>
+            <td>29.19 mm</td>
+            <td><strong>5.34 mm (-81.7%)</strong></td>
+            <td>5.20 mm</td>
+          </tr>
+          <tr>
+            <td><strong>MCU ↔ Decap (C1, C2) Avg</strong></td>
+            <td>21.03 mm</td>
+            <td><span class="badge-good">4.71 mm (Beat human reference!)</span></td>
+            <td>5.39 mm</td>
+          </tr>
+          <tr>
+            <td><strong>LDO ↔ XTAL Separation</strong> (Target &ge; 20 mm)</td>
+            <td>15.59 mm</td>
+            <td><span class="badge-good">20.78 mm (Full bonus achieved!)</span></td>
+            <td>9.54 mm</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <div style="font-size: 13px; color: var(--text-muted);">
+      Use <strong>← / → Arrow Keys</strong> or <strong>Space</strong> to navigate slides
+    </div>
+    <div class="nav-btns">
+      <button class="btn" id="prevBtn" type="button">← Previous</button>
+      <button class="btn btn-primary" id="nextBtn" type="button">Next →</button>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dotsContainer = document.getElementById('dotsContainer');
+      const slideCounter = document.getElementById('slideCounter');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      let current = 0;
+
+      // Build navigation dots using safe DOM creation (no innerHTML)
+      const dots = slides.map(function (_, idx) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = idx === 0 ? 'dot active' : 'dot';
+        btn.setAttribute('aria-label', 'Go to slide ' + (idx + 1));
+        btn.addEventListener('click', function () {
+          goToSlide(idx);
+        });
+        dotsContainer.appendChild(btn);
+        return btn;
+      });
+
+      function updateView() {
+        slides.forEach(function (s, idx) {
+          s.classList.toggle('active', idx === current);
+        });
+        dots.forEach(function (d, idx) {
+          d.classList.toggle('active', idx === current);
+        });
+        slideCounter.textContent = 'Slide ' + (current + 1) + ' / ' + slides.length;
+        prevBtn.disabled = current === 0;
+        nextBtn.textContent = current === slides.length - 1 ? 'Restart ↺' : 'Next →';
+      }
+
+      function goToSlide(index) {
+        const nextIndex = (index + slides.length) % slides.length;
+        if (document.startViewTransition) {
+          document.startViewTransition(function () {
+            current = nextIndex;
+            updateView();
+          });
+        } else {
+          current = nextIndex;
+          updateView();
+        }
+      }
+
+      prevBtn.addEventListener('click', function () {
+        if (current > 0) goToSlide(current - 1);
+      });
+
+      nextBtn.addEventListener('click', function () {
+        goToSlide(current + 1);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          goToSlide(current + 1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (current > 0) goToSlide(current - 1);
+        }
+      });
+
+      updateView();
+    })();
+  </script>
+</body>
+</html>

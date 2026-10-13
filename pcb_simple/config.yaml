@@ -1,0 +1,18 @@
+# Only needed for OpenEvolve (the free open-source option).
+# Not used by AlphaEvolve on Gemini Enterprise.
+max_iterations: 100
+llm:
+  api_base: "https://us-central1-aiplatform.googleapis.com/v1/projects/bold-kit-384717/locations/us-central1/endpoints/openapi"   # Vertex AI OpenAI-compatible endpoint (any OpenAI-compatible endpoint)
+  models:
+    - name: "google/gemini-3.8-flash"        # change to a model your key can use
+      weight: 1.0
+prompt:
+  system_message: |
+    Improve the Python function place(), which positions parts on a PCB.
+    It returns {name: (x, y)}, the CENTRE of every part in mm.
+    Hard rules (breaking one scores 0): every part fully inside the board,
+    no two parts overlapping (0.3 mm clearance), a position for every part.
+    Goals: short total wirelength over NETS; XTAL very close to MCU;
+    C1 and C2 very close to MCU; LDO far from XTAL (up to ~20 mm).
+    Write a general algorithm, deterministic, standard library only,
+    finishing in well under a second. Keep the function signature unchanged.
